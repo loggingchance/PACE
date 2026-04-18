@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#0070C0">
+<title>PACE · Productivity Analysis and Cost Evaluation</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue:      #0070C0;
+  --blue-dk:   #005A9B;
+  --blue-xdk:  #003D70;
+  --blue-lt:   #E5F0FA;
+  --blue-mid:  #CCE4F5;
+  --gold:      #F0A500;
+  --gold-lt:   #FFF8E6;
+  --dark:      #0D1B2A;
+  --mid:       #4A5E72;
+  --pale:      #8A9BB0;
+  --surface:   #F4F8FC;
+  --white:     #FFFFFF;
+  --border:    #D0DDE8;
+  --computed:  #EAF3FB;
+  --nav-h:     60px;
+  --hdr-h:     56px;
+  --radius:    12px;
+  --radius-sm: 8px;
+  --shadow:    0 2px 12px rgba(0,112,192,.10);
+  --shadow-lg: 0 6px 28px rgba(0,112,192,.16);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;font-family:'Barlow',sans-serif;font-size:16px;color:var(--dark);background:var(--blue-xdk)}
+
+/* ── APP SHELL ── */
+#app{display:flex;flex-direction:column;height:100%;max-width:430px;margin:0 auto;background:var(--surface);position:relative;overflow:hidden;box-shadow:0 0 60px rgba(0,0,0,.35)}
+
+/* ── HEADER ── */
+.app-hdr{background:var(--blue);color:#fff;height:var(--hdr-h);display:flex;align-items:center;padding:0 16px;flex-shrink:0;z-index:10;gap:10px}
+.hdr-wordmark{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;letter-spacing:1.5px;flex:1;line-height:1}
+.hdr-wordmark .dot{color:var(--gold);margin:0 2px}
+.hdr-sub{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:1px;opacity:.6;display:block;margin-top:1px}
+.menu-btn{background:rgba(255,255,255,.1);border:none;color:#fff;width:36px;height:36px;border-radius:8px;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.menu-btn:active{background:rgba(255,255,255,.2)}
+
+/* ── SCREENS ── */
+#screens{flex:1;overflow:hidden;position:relative}
+.screen{position:absolute;top:0;left:0;right:0;bottom:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;opacity:0;pointer-events:none;transform:translateX(24px);transition:opacity .22s ease,transform .22s ease;padding-bottom:20px}
+.screen.active{opacity:1;pointer-events:all;transform:translateX(0)}
+
+/* ── BOTTOM NAV ── */
+.bot-nav{height:var(--nav-h);background:var(--white);border-top:1px solid var(--border);display:flex;flex-shrink:0;z-index:10}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:none;background:none;color:var(--pale);font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:color .2s;position:relative;padding:0 2px}
+.nav-icon{font-size:19px;line-height:1}
+.nav-btn.active{color:var(--blue)}
+.nav-btn.active::before{content:'';position:absolute;top:0;left:25%;right:25%;height:3px;background:var(--blue);border-radius:0 0 3px 3px}
+
+/* ── SECTION BARS ── */
+.sec-bar{background:var(--blue);color:#fff;padding:10px 16px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:.5px;text-transform:uppercase;display:flex;align-items:center;gap:10px}
+.sec-bar.sub-bar{background:var(--blue-lt);color:var(--blue-dk);font-size:13px}
+.snum{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0;background:var(--gold);color:var(--dark)}
+.sub-bar .snum{background:var(--blue);color:#fff;width:20px;height:20px;font-size:11px}
+
+/* ── CARDS ── */
+.card{background:var(--white);margin:12px;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+.card-body{padding:14px 16px}
+.card+.card{margin-top:0}
+
+/* ── FORM FIELDS ── */
+.field{margin-bottom:14px}
+.field:last-child{margin-bottom:0}
+.field>label,.field-lbl{display:block;font-size:11.5px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.4px;margin-bottom:5px}
+.field input[type=text],.field input[type=number],.field input[type=email],.field select{width:100%;height:44px;border:1.5px solid var(--border);border-radius:var(--radius-sm);padding:0 12px;font-family:'Barlow',sans-serif;font-size:15px;color:var(--dark);background:var(--white);appearance:none;-webkit-appearance:none;outline:none;transition:border-color .2s,box-shadow .2s}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24'%3E%3Cpath fill='%230070C0' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:36px}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(0,112,192,.12)}
+.computed-val{height:44px;background:var(--computed);border:1.5px solid var(--blue-mid);border-radius:var(--radius-sm);padding:0 12px;font-family:'Barlow',sans-serif;font-size:15px;font-weight:600;color:var(--blue-dk);display:flex;align-items:center}
+.hint{font-size:11px;color:var(--pale);margin-top:4px;line-height:1.45}
+.dollar-wrap{position:relative}
+.dollar-wrap::before{content:'$';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--mid);font-weight:600;pointer-events:none;font-size:15px}
+.dollar-wrap input{padding-left:26px}
+
+/* ── EQUIPMENT TABLE ── */
+.eq-table{width:100%;border-collapse:collapse}
+.eq-table th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.3px;color:var(--mid);padding:6px 6px;border-bottom:1.5px solid var(--border);text-align:left}
+.eq-table th:last-child{text-align:right;width:90px}
+.eq-table td{padding:3px 4px}
+.eq-table tr:nth-child(even) td{background:#FAFCFE}
+.eq-num{font-family:'Barlow Condensed',sans-serif;font-size:12px;color:var(--pale);width:22px;text-align:center;padding-left:2px !important}
+.eq-name{border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:14px;width:100%;outline:none;color:var(--dark);font-family:'Barlow',sans-serif}
+.eq-name:focus{border-color:var(--blue)}
+.eq-hrs{border:1px solid var(--border);border-radius:6px;padding:6px 8px;font-size:14px;width:82px;text-align:right;outline:none;color:var(--dark);font-family:'Barlow',sans-serif}
+.eq-hrs:focus{border-color:var(--blue)}
+
+/* ── TOTALS ROW ── */
+.total-row{background:var(--blue-lt);border-radius:var(--radius-sm);padding:10px 14px;display:flex;justify-content:space-between;align-items:center;margin-top:10px}
+.total-row .tr-lbl{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;color:var(--blue-dk)}
+.total-row .tr-val{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;color:var(--blue)}
+
+/* ── PRODUCTION ROWS ── */
+.prod-row{display:grid;grid-template-columns:1fr 110px 52px;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid #F0F5FA}
+.prod-row:last-child{border-bottom:none}
+.prod-lbl{font-size:13px;color:var(--dark);font-weight:500}
+.prod-input{border:1px solid var(--border);border-radius:6px;padding:7px 8px;font-size:14px;text-align:right;outline:none;color:var(--dark);width:100%;font-family:'Barlow',sans-serif}
+.prod-input:focus{border-color:var(--blue)}
+.prod-unit{font-size:12px;color:var(--pale);text-align:center}
+
+/* ── CF GRID ── */
+.cf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cf-item label{font-size:11px;font-weight:600;color:var(--mid);text-transform:uppercase;letter-spacing:.3px;display:block;margin-bottom:4px}
+.cf-item input{width:100%;border:1px solid var(--border);border-radius:6px;padding:7px 10px;font-size:14px;text-align:right;outline:none;color:var(--dark);font-family:'Barlow',sans-serif}
+.cf-item input:focus{border-color:var(--blue)}
+
+/* ── OVERHEAD ROWS ── */
+.oh-row{display:flex;align-items:flex-start;gap:10px;padding:10px 0;border-bottom:1px solid #F0F5FA}
+.oh-row:last-child{border-bottom:none}
+.oh-lbl{flex:1}
+.oh-lbl .name{font-size:14px;font-weight:500;color:var(--dark)}
+.oh-lbl .desc{font-size:11px;color:var(--pale);margin-top:2px;line-height:1.4}
+.oh-inp-wrap{width:118px;flex-shrink:0;position:relative}
+.oh-inp-wrap::before{content:'$';position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--mid);font-size:13px;pointer-events:none}
+.oh-input{width:100%;border:1px solid var(--border);border-radius:6px;padding:8px 8px 8px 22px;font-size:14px;text-align:right;outline:none;color:var(--dark);font-family:'Barlow',sans-serif}
+.oh-input:focus{border-color:var(--blue)}
+
+/* ── TOGGLE SWITCH ── */
+.toggle-wrap{display:flex;background:var(--blue-lt);border-radius:8px;padding:3px;gap:3px;margin-bottom:12px}
+.tog-opt{flex:1;padding:9px 6px;border:none;border-radius:6px;background:transparent;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;color:var(--mid);cursor:pointer;transition:all .2s;text-align:center}
+.tog-opt.active{background:var(--blue);color:#fff;font-weight:600;box-shadow:0 2px 6px rgba(0,112,192,.3)}
+
+/* ── COLLAPSIBLE ── */
+.coll-hdr{display:flex;align-items:center;justify-content:space-between;cursor:pointer;padding:11px 14px;background:var(--blue-lt);margin-top:12px;border-radius:var(--radius-sm)}
+.coll-hdr .ch-title{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;text-transform:uppercase;color:var(--blue-dk);letter-spacing:.3px}
+.coll-arrow{font-size:14px;color:var(--blue);transition:transform .2s}
+.coll-arrow.open{transform:rotate(180deg)}
+.coll-body{display:none;margin-top:8px}
+.coll-body.open{display:block}
+
+/* ── TAX TABLE ── */
+.tax-tbl{width:100%;border-collapse:collapse}
+.tax-tbl th{background:var(--blue);color:#fff;padding:7px 10px;font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;text-align:left}
+.tax-tbl td{padding:7px 10px;font-size:13px;border-bottom:1px solid var(--border)}
+.tax-tbl tr:last-child td{border-bottom:none}
+.tax-tbl tr:nth-child(even) td{background:#F8FBFE}
+
+/* ── HOME SCREEN ── */
+.home-hero{background:linear-gradient(160deg,var(--blue) 0%,var(--blue-xdk) 100%);padding:30px 20px 36px;color:#fff;position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;top:-50px;right:-50px;width:200px;height:200px;border:1.5px solid rgba(255,255,255,.07);border-radius:50%}
+.home-hero::after{content:'';position:absolute;bottom:-70px;right:-20px;width:260px;height:260px;border:1.5px solid rgba(255,255,255,.04);border-radius:50%}
+.pac-badge{display:inline-flex;align-items:baseline;gap:2px;position:relative}
+.pac-big{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:68px;letter-spacing:6px;line-height:1;color:#fff}
+.pac-big .ga{color:var(--gold)}
+.pac-tag{font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:rgba(255,255,255,.55);margin-top:6px;margin-bottom:16px}
+.pac-desc{font-size:14px;line-height:1.7;color:rgba(255,255,255,.82);max-width:360px}
+.home-version{margin-top:14px;display:inline-block;background:rgba(255,255,255,.1);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;letter-spacing:.5px;color:rgba(255,255,255,.6)}
+.nav-cards{padding:14px 12px;display:flex;flex-direction:column;gap:10px}
+.nav-card{background:var(--white);border-radius:var(--radius);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--shadow);border:none;width:100%;cursor:pointer;text-align:left;transition:transform .15s,box-shadow .15s}
+.nav-card:active{transform:scale(0.98);box-shadow:none}
+.nc-icon{width:44px;height:44px;border-radius:10px;background:var(--blue-lt);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.nc-text{flex:1}
+.nc-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--dark);text-transform:uppercase;letter-spacing:.5px}
+.nc-sub{font-size:12px;color:var(--mid);margin-top:2px}
+.nc-arr{color:var(--blue);font-size:22px;font-weight:300}
+
+/* ── SCREEN TITLE BAR ── */
+.scr-title{padding:16px 16px 8px;background:var(--surface)}
+.scr-title .st{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:22px;text-transform:uppercase;letter-spacing:1px;color:var(--dark)}
+.scr-title .ss{font-size:13px;color:var(--mid);margin-top:2px}
+
+/* ── REPORT ── */
+.rpt-hdr{background:linear-gradient(140deg,var(--blue),var(--blue-xdk));color:#fff;padding:20px 16px}
+.rpt-hdr-lbl{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:rgba(255,255,255,.5);margin-bottom:4px}
+.rpt-id{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:24px;margin-bottom:16px}
+.rpt-meta{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rmt-lbl{color:rgba(255,255,255,.5);font-size:11px;margin-bottom:2px}
+.rmt-val{font-weight:600;font-size:14px}
+.metrics-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px 12px 2px}
+.met-card{background:var(--white);border-radius:var(--radius);padding:14px;box-shadow:var(--shadow);text-align:center}
+.met-card.wide{grid-column:span 2}
+.m-lbl{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--pale);margin-bottom:6px}
+.m-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;color:var(--blue);line-height:1}
+.met-card.gold .m-val{color:var(--gold)}
+.m-unit{font-size:11px;color:var(--mid);margin-top:4px}
+.prod-rpt-tbl{width:100%;border-collapse:collapse}
+.prod-rpt-tbl th{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;color:#fff;background:var(--blue);padding:8px 10px;text-align:left}
+.prod-rpt-tbl th:last-child{text-align:right}
+.prod-rpt-tbl td{padding:9px 10px;font-size:13px;border-bottom:1px solid var(--border)}
+.prod-rpt-tbl td:last-child{text-align:right;font-weight:600}
+.prod-rpt-tbl tr:last-child td{border-bottom:none}
+.rpt-total td{background:var(--blue-lt);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;color:var(--blue-dk);border-bottom:none !important}
+
+/* ── SUBMIT ── */
+.submit-card{margin:12px;background:var(--white);border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.submit-card .s-title{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;text-transform:uppercase;letter-spacing:.5px;color:var(--dark);margin-bottom:12px}
+.btn-blue{width:100%;height:48px;background:var(--blue);color:#fff;border:none;border-radius:var(--radius-sm);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:background .2s,transform .1s;display:flex;align-items:center;justify-content:center;gap:8px}
+.btn-blue:active{transform:scale(0.98);background:var(--blue-dk)}
+.btn-outline{width:100%;height:44px;background:transparent;color:var(--blue);border:2px solid var(--blue);border-radius:var(--radius-sm);font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .2s;margin-top:8px;display:flex;align-items:center;justify-content:center;gap:6px}
+.btn-outline:active{background:var(--blue-lt)}
+
+/* ── PROSE ── */
+.prose-card{background:var(--white);margin:12px;border-radius:var(--radius);padding:16px;box-shadow:var(--shadow)}
+.prose-card h3{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:16px;color:var(--blue);text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.prose-card p{font-size:14px;line-height:1.75;color:var(--mid);margin-bottom:10px}
+.prose-card p:last-child{margin-bottom:0}
+
+/* ── INSTALL STEPS ── */
+.inst-step{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+.inst-step:last-child{border-bottom:none}
+.inst-num{width:28px;height:28px;border-radius:50%;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;flex-shrink:0}
+.inst-txt{font-size:14px;color:var(--dark);line-height:1.55;padding-top:4px}
+
+/* ── ABOUT CHIPS ── */
+.about-chips{display:flex;gap:10px;margin:12px 0}
+.a-chip{background:var(--blue-lt);border-radius:8px;padding:10px 14px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:13px;color:var(--blue);line-height:1.4;text-align:center;border-left:3px solid var(--blue)}
+
+/* ── WARN BANNER ── */
+.warn-banner{background:var(--gold-lt);border-left:3px solid var(--gold);padding:10px 14px;margin:12px;border-radius:0 var(--radius-sm) var(--radius-sm) 0;font-size:13px;color:var(--dark);line-height:1.5}
+
+/* ── OVERFLOW MENU ── */
+.menu-overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0);z-index:100;pointer-events:none;transition:background .25s}
+.menu-overlay.open{background:rgba(0,0,0,.4);pointer-events:all}
+.menu-panel{position:absolute;top:0;right:0;width:230px;height:100%;background:var(--white);transform:translateX(100%);transition:transform .25s ease;padding:20px 0;display:flex;flex-direction:column}
+.menu-overlay.open .menu-panel{transform:translateX(0)}
+.menu-sec{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--pale);padding:14px 20px 6px}
+.menu-item{display:flex;align-items:center;gap:14px;padding:13px 20px;font-size:15px;font-weight:500;color:var(--dark);cursor:pointer;border:none;background:none;width:100%;text-align:left;transition:background .15s}
+.menu-item:active{background:var(--blue-lt)}
+.mi-ico{font-size:18px;width:24px;text-align:center}
+.menu-div{height:1px;background:var(--border);margin:8px 0}
+.menu-item.danger{color:#C0392B}
+
+/* ── PRINT ── */
+@media print{
+  .app-hdr,.bot-nav,.submit-card{display:none !important}
+  .screen{position:static;opacity:1;pointer-events:all;transform:none;overflow:visible}
+  body,html{overflow:visible;height:auto}
+  #app{max-width:100%;height:auto;box-shadow:none}
+  #screens{overflow:visible;height:auto;position:static}
+  #screen-report{display:block !important;position:static}
+  .card{box-shadow:none;margin:8px 0;page-break-inside:avoid}
+  .metrics-grid{display:flex;flex-wrap:wrap;gap:8px}
+  .met-card{border:1px solid var(--border)}
+}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- HEADER -->
+<header class="app-hdr">
+  <div class="hdr-wordmark">
+    PACE<span class="dot">·</span>
+    <span style="font-weight:400;font-size:16px;opacity:.85">Logging P&amp;C</span>
+  </div>
+  <button class="menu-btn" onclick="openMenu()" aria-label="Menu">☰</button>
+</header>
+
+<!-- OVERFLOW MENU -->
+<div class="menu-overlay" id="menuOverlay" onclick="handleOverlayClick(event)">
+  <div class="menu-panel">
+    <div class="menu-sec">Navigate</div>
+    <button class="menu-item" onclick="go('howto');closeMenu()"><span class="mi-ico">📋</span>How To Use</button>
+    <button class="menu-item" onclick="go('about');closeMenu()"><span class="mi-ico">ℹ️</span>About PACE</button>
+    <button class="menu-item" onclick="go('install');closeMenu()"><span class="mi-ico">📱</span>Install App</button>
+    <div class="menu-div"></div>
+    <div class="menu-sec">Data</div>
+    <button class="menu-item danger" onclick="resetAll();closeMenu()"><span class="mi-ico">🔄</span>Reset All Data</button>
+  </div>
+</div>
+
+<!-- SCREENS -->
+<div id="screens">
+
+<!-- ╔══ HOME ══╗ -->
+<div class="screen active" id="screen-home">
+  <div class="home-hero">
+    <div class="pac-big">P<span class="ga">A</span>CE</div>
+    <div class="pac-tag">Productivity Analysis and Cost Evaluation</div>
+    <div class="pac-desc">Benchmark logging costs and productivity for individual businesses. Calculate cost per ton, productivity, and unit costs by product.</div>
+    <div class="home-version">v7 · Northeast Forests LLC</div>
+  </div>
+  <div class="nav-cards">
+    <button class="nav-card" onclick="go('productivity');navActive('productivity')">
+      <div class="nc-icon">🌲</div>
+      <div class="nc-text"><div class="nc-title">Benchmark Productivity</div><div class="nc-sub">Equipment hours &amp; annual production by product</div></div>
+      <div class="nc-arr">›</div>
+    </button>
+    <button class="nav-card" onclick="go('costs');navActive('costs')">
+      <div class="nc-icon">💰</div>
+      <div class="nc-text"><div class="nc-title">Benchmark Costs</div><div class="nc-sub">Overhead, payroll, fuel &amp; equipment costs</div></div>
+      <div class="nc-arr">›</div>
+    </button>
+    <button class="nav-card" onclick="go('report');navActive('report')">
+      <div class="nc-icon">📊</div>
+      <div class="nc-text"><div class="nc-title">View Report</div><div class="nc-sub">Summary results, cost by product, submit</div></div>
+      <div class="nc-arr">›</div>
+    </button>
+    <button class="nav-card" onclick="go('howto')">
+      <div class="nc-icon">📋</div>
+      <div class="nc-text"><div class="nc-title">How To Use</div><div class="nc-sub">Instructions &amp; guidance</div></div>
+      <div class="nc-arr">›</div>
+    </button>
+  </div>
+</div>
+
+<!-- ╔══ HOW TO ══╗ -->
+<div class="screen" id="screen-howto">
+  <div class="scr-title"><div class="st">How To Use PACE</div><div class="ss">Productivity Analysis and Cost Evaluation</div></div>
+  <div class="prose-card">
+    <h3>What does PACE do?</h3>
+    <p>PACE allows you to benchmark costs and productivity for individual logging businesses. Costs are calculated in dollars per ton and then re-allocated to the entire product range ($/MBF, $/cord). Productivity is expressed in tons per machine hour.</p>
+    <p>A summary report can be provided to the supplier and submitted to your organization for aggregation.</p>
+  </div>
+  <div class="card">
+    <div class="sec-bar"><div class="snum">1</div>Benchmark Productivity</div>
+    <div class="card-body">
+      <p style="font-size:14px;line-height:1.75;color:var(--mid)">Enter an anonymous identifier, system type, business size, and region. Then list each machine along with annual machine hours from meter readings or estimates. For machines used for non-forestry purposes (e.g., excavators), enter only hours used in connection with logging.</p>
+      <p style="font-size:14px;line-height:1.75;color:var(--mid);margin-top:8px">Next, select the predominant log rule and enter annual production in each product category. Conversion factors can be adjusted to fit your area.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-bar"><div class="snum">2</div>Benchmark Costs</div>
+    <div class="card-body">
+      <p style="font-size:14px;line-height:1.75;color:var(--mid)">Enter annual overhead and variable costs. Overhead can be referenced from income tax returns. If the business has additional income beyond timber harvesting, prorate costs to reflect only the logging portion. Remove all costs associated with trucking.</p>
+      <p style="font-size:14px;line-height:1.75;color:var(--mid);margin-top:8px">Enter accurate equipment fair market values — not tax depreciation. Include a wage for owner-operators even if they don't draw a regular paycheck.</p>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-bar"><div class="snum">3</div>Report Results</div>
+    <div class="card-body">
+      <p style="font-size:14px;line-height:1.75;color:var(--mid)">Once data is entered, a complete report is compiled. Send one copy to the logger and archive a second copy for aggregate reporting. Use <strong>Print / Save as PDF</strong> to create a portable copy, or tap <strong>Submit</strong> to send the report by email.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ PRODUCTIVITY ══╗ -->
+<div class="screen" id="screen-productivity">
+  <div class="scr-title"><div class="st">Benchmark Productivity</div><div class="ss">Sections 1 – 4</div></div>
+
+  <!-- § 1 General Info -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">1</div>General Information</div>
+    <div class="card-body">
+      <div class="field"><label>Identifier</label><input type="text" id="identifier" placeholder="Anonymous identifier" oninput="save()"></div>
+      <div class="field"><label>Year</label><input type="number" id="year" placeholder="e.g. 2024" min="2000" max="2099" oninput="save()"></div>
+      <div class="field">
+        <label>System Type</label>
+        <select id="systemType" onchange="toggleSysOther();save()">
+          <option value="cut-to-length">Cut-to-Length</option>
+          <option value="whole-tree">Whole-Tree</option>
+          <option value="whole-tree with chipper">Whole-Tree with Chipper</option>
+          <option value="tree-length">Tree-Length</option>
+          <option value="hybrid/other">Hybrid / Other (specify below)</option>
+        </select>
+      </div>
+      <div class="field" id="sysOtherField" style="display:none"><label>Specify System Type</label><input type="text" id="systemOther" oninput="save()"></div>
+      <div class="field">
+        <label>Business Size</label>
+        <select id="businessSize" onchange="save()">
+          <option value="single crew">Single Crew</option>
+          <option value="multiple crews">Multiple Crews</option>
+          <option value="part of multiple enterprises">Part of Multiple Enterprises</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Region</label>
+        <select id="region" onchange="toggleRegOther();save()">
+          <option value="Northeast">Northeast</option>
+          <option value="Mid-Atlantic / Appalachian">Mid-Atlantic / Appalachian</option>
+          <option value="Southeast">Southeast</option>
+          <option value="Great Lakes / Midwest">Great Lakes / Midwest</option>
+          <option value="South Central">South Central / Gulf States</option>
+          <option value="Northern Rockies / Inland NW">Northern Rockies / Inland NW</option>
+          <option value="Pacific Northwest">Pacific Northwest</option>
+          <option value="Other">Other (specify below)</option>
+        </select>
+      </div>
+      <div class="field" id="regOtherField" style="display:none"><label>Specify Region</label><input type="text" id="regionOther" oninput="save()"></div>
+    </div>
+  </div>
+
+  <!-- § 2 Equipment -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">2</div>List Equipment</div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--pale);margin-bottom:10px;line-height:1.5">Include all logging equipment. Exclude work trucks. Enter only hours used in connection with logging for multi-purpose machines.</p>
+      <table class="eq-table">
+        <thead><tr><th>#</th><th>Equipment Name</th><th style="text-align:right">Hrs / Year *</th></tr></thead>
+        <tbody id="eqTbody"></tbody>
+      </table>
+      <div class="total-row"><span class="tr-lbl">Total Machine Hours</span><span class="tr-val" id="disp_totalMH">0</span></div>
+      <p style="font-size:11px;color:var(--pale);margin-top:6px">* Hour meters are best; use estimates if unavailable.</p>
+    </div>
+  </div>
+
+  <!-- § 3 Production -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">3</div>Annual Production</div>
+    <div class="card-body">
+      <div class="field">
+        <label>Log Rule</label>
+        <select id="logRule" onchange="applyLogRule();save()">
+          <option value="Scribner Decimal C">Scribner Decimal C</option>
+          <option value="International 1/4&quot;">International ¼"</option>
+          <option value="Doyle">Doyle</option>
+        </select>
+      </div>
+      <div id="prodRows"></div>
+      <div class="total-row"><span class="tr-lbl">Total Tons</span><span class="tr-val" id="disp_totalTons">0</span></div>
+    </div>
+  </div>
+
+  <!-- § 4 Conversion Factors -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">4</div>Conversion Factors</div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--pale);margin-bottom:12px">Auto-filled from selected log rule. Customize to fit your area.</p>
+      <div class="cf-grid">
+        <div class="cf-item"><label>Hdwd Tons / MBF</label><input type="number" id="cf_hdwdMBF" step="0.01" oninput="save();recalc()"></div>
+        <div class="cf-item"><label>Swd Tons / MBF</label><input type="number" id="cf_swdMBF" step="0.01" oninput="save();recalc()"></div>
+        <div class="cf-item"><label>Hdwd Tons / Cord</label><input type="number" id="cf_hdwdCord" step="0.01" oninput="save();recalc()"></div>
+        <div class="cf-item"><label>Swd Tons / Cord</label><input type="number" id="cf_swdCord" step="0.01" oninput="save();recalc()"></div>
+      </div>
+      <p style="font-size:11px;color:var(--pale);margin-top:10px">Swd tons/cord used for softwood cordwood if applicable.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ COSTS ══╗ -->
+<div class="screen" id="screen-costs">
+  <div class="scr-title"><div class="st">Benchmark Costs</div><div class="ss">Annual overhead &amp; business costs</div></div>
+  <div class="warn-banner">⚠ Remove all costs associated with trucking before entering values below.</div>
+
+  <!-- § 1 Overhead -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">1</div>Annual Overhead</div>
+    <div class="card-body">
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Insurance</div><div class="desc">Liability &amp; equipment insurance; exclude worker's comp</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_insurance" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Repairs &amp; Maintenance</div><div class="desc">Equipment &amp; shop; actual or ~7% of gross revenue</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_repairs" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Office Expenses</div><div class="desc">Administrative costs; exclude payroll</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_office" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Vehicle Expenses</div><div class="desc">Annual miles × IRS mileage rate; exclude trucking</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_vehicle" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Work Supplies</div><div class="desc">Tools and supplies kept on hand</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_supplies" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Travel</div><div class="desc">Hotels, airfare, car rentals &amp; business travel</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_travel" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Utilities</div><div class="desc">Phones, internet, shop &amp; office utilities</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_utilities" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="oh-row"><div class="oh-lbl"><div class="name">Other Expenses</div><div class="desc">Business expenses not listed above</div></div><div class="oh-inp-wrap"><input class="oh-input" type="number" id="oh_other" min="0" oninput="save();recalc()" placeholder="0"></div></div>
+      <div class="total-row" style="margin-top:14px"><span class="tr-lbl">Total Annual Overhead</span><span class="tr-val" id="disp_overhead">$0</span></div>
+
+      <!-- Tax table collapsible -->
+      <div class="coll-hdr" onclick="toggleColl(this)">
+        <span class="ch-title">📄 Income Tax Form Reference</span>
+        <span class="coll-arrow">▾</span>
+      </div>
+      <div class="coll-body">
+        <table class="tax-tbl">
+          <thead><tr><th>Business Type</th><th>IRS Form</th></tr></thead>
+          <tbody>
+            <tr><td>Sole Proprietor (dba)</td><td>1040, Sch C</td></tr>
+            <tr><td>Pass Through LLC</td><td>1040, Sch C</td></tr>
+            <tr><td>C Corporation</td><td>Form 1120</td></tr>
+            <tr><td>LLCs filing as C Corp</td><td>Form 1120</td></tr>
+            <tr><td>S Corporations</td><td>Form 1120-s</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- § 2 Business Specs -->
+  <div class="card">
+    <div class="sec-bar"><div class="snum">2</div>Business Specs &amp; Costs</div>
+    <div class="card-body">
+      <p style="font-size:12px;color:var(--mid);margin-bottom:14px">FMV = Fair Market Value. Use actual values, not tax depreciation figures.</p>
+      <div class="field"><label>Equipment Value — Start of Year (FMV)</label><div class="dollar-wrap"><input type="number" id="eqStart" min="0" oninput="save();recalc()" placeholder="0"></div><div class="hint">Fair market value of all equipment on Jan. 1</div></div>
+      <div class="field"><label>Equipment Value — End of Year (FMV)</label><div class="dollar-wrap"><input type="number" id="eqEnd" min="0" oninput="save();recalc()" placeholder="0"></div><div class="hint">Fair market value of all equipment at year end</div></div>
+      <div class="field"><label>Core Equipment Value (Future Resale)</label><div class="dollar-wrap"><input type="number" id="coreValue" min="0" oninput="save();recalc()" placeholder="0"></div><div class="hint">Projected eventual resale / salvage value</div></div>
+      <div class="field"><label>Annual Overhead (carried over)</label><div class="computed-val" id="oh_carryover">$0</div></div>
+
+      <div style="margin:14px 0 8px">
+        <div class="field-lbl">Depreciation Method</div>
+        <div class="toggle-wrap">
+          <button class="tog-opt active" id="tog_dep" onclick="setDepMethod('calc')">Use Depreciation</button>
+          <button class="tog-opt" id="tog_loans" onclick="setDepMethod('loans')">Use Loan Payments</button>
+        </div>
+      </div>
+      <div id="sec_dep">
+        <div class="field"><label>Annual Depreciation (calculated)</label><div class="computed-val" id="disp_calcDep">$0</div><div class="hint">Equipment Value Start − End</div></div>
+      </div>
+      <div id="sec_loans" style="display:none">
+        <div class="field"><label>Annual Loan Payments</label><div class="dollar-wrap"><input type="number" id="loanPayments" min="0" oninput="save();recalc()" placeholder="0"></div><div class="hint">Sum of all monthly payments for the year; be precise</div></div>
+      </div>
+
+      <div class="field"><label>Annual Payroll &amp; Compensation</label><div class="dollar-wrap"><input type="number" id="payroll" min="0" oninput="save();recalc()" placeholder="0"></div><div class="hint">All staff + owner salary incl. workers' comp &amp; benefits. Include owner-operator wage even without regular paycheck.</div></div>
+      <div class="field"><label>Fuel Consumption (off-road gallons / year)</label><input type="number" id="fuelGal" min="0" oninput="save();recalc()" placeholder="0"></div>
+      <div class="field"><label>Fuel Price ($ / gallon)</label><div class="dollar-wrap"><input type="number" id="fuelPrice" min="0" step="0.01" oninput="save();recalc()" placeholder="0.00"></div><div class="hint">Use latest off-road diesel price</div></div>
+      <div class="field"><label>Opportunity Cost (5% of avg. investment)</label><div class="computed-val" id="disp_oppCost">$0</div><div class="hint">(Eq. Value Start + Core Value) ÷ 2 × 5%</div></div>
+
+      <div class="total-row" style="margin-top:14px"><span class="tr-lbl">Total Annual Costs</span><span class="tr-val" id="disp_totalCosts">$0</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- ╔══ REPORT ══╗ -->
+<div class="screen" id="screen-report">
+  <div class="rpt-hdr">
+    <div class="rpt-hdr-lbl">Summary Report · PACE</div>
+    <div class="rpt-id" id="r_id">—</div>
+    <div class="rpt-meta">
+      <div><div class="rmt-lbl">Year</div><div class="rmt-val" id="r_year">—</div></div>
+      <div><div class="rmt-lbl">System</div><div class="rmt-val" id="r_system">—</div></div>
+      <div><div class="rmt-lbl">Size</div><div class="rmt-val" id="r_size">—</div></div>
+      <div><div class="rmt-lbl">Region</div><div class="rmt-val" id="r_region">—</div></div>
+    </div>
+  </div>
+
+  <div class="metrics-grid">
+    <div class="met-card"><div class="m-lbl">Total Expenses</div><div class="m-val" id="r_costs">—</div><div class="m-unit">dollars</div></div>
+    <div class="met-card"><div class="m-lbl">Machine Hours</div><div class="m-val" id="r_mh">—</div><div class="m-unit">total hrs</div></div>
+    <div class="met-card"><div class="m-lbl">Total Production</div><div class="m-val" id="r_tons">—</div><div class="m-unit">tons</div></div>
+    <div class="met-card"><div class="m-lbl">Cost per Ton</div><div class="m-val" id="r_cpt">—</div><div class="m-unit">dollars / ton</div></div>
+    <div class="met-card wide gold"><div class="m-lbl">Productivity</div><div class="m-val" id="r_tmh">—</div><div class="m-unit">tons per machine hour</div></div>
+  </div>
+
+  <div class="card" style="margin-top:0">
+    <div class="sec-bar">Cost by Product</div>
+    <div style="overflow-x:auto">
+      <table class="prod-rpt-tbl">
+        <thead><tr><th>Product</th><th style="text-align:center">Tons</th><th style="text-align:center">% Prod</th><th style="text-align:right">Unit Cost</th></tr></thead>
+        <tbody id="r_prodBody"><tr><td colspan="4" style="text-align:center;color:var(--pale);padding:16px;font-size:13px">Enter data in Productivity &amp; Costs to see results.</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="submit-card">
+    <div class="s-title">Share &amp; Archive This Report</div>
+    <div class="field"><label>Recipient Email</label><input type="email" id="submitEmail" placeholder="logger@example.com" oninput="save()"></div>
+    <button class="btn-blue" onclick="doSubmit()">✉&nbsp; Submit Report by Email</button>
+    <button class="btn-outline" onclick="window.print()">🖨&nbsp; Print / Save as PDF</button>
+  </div>
+</div>
+
+<!-- ╔══ ABOUT ══╗ -->
+<div class="screen" id="screen-about">
+  <div class="scr-title"><div class="st">About PACE</div><div class="ss">v7 · Productivity Analysis and Cost Evaluation</div></div>
+  <div class="prose-card">
+    <h3>Purpose</h3>
+    <p>PACE aggregates anonymous logging cost and productivity data for the benefit of all participants in the forest products supply chain. Data is separated from individual entities and used to benchmark regional cost and productivity ranges.</p>
+    <div class="about-chips">
+      <div class="a-chip">Northeast<br>Forests LLC</div>
+    </div>
+    <p>Northeast Forests, LLC provides research, extension and support services to the forest products industry and the working landscape.</p>
+    <p style="font-size:12px;color:var(--pale)">This app is intended for informational purposes and provides no guarantee of financial success.</p>
+  </div>
+</div>
+
+<!-- ╔══ INSTALL ══╗ -->
+<div class="screen" id="screen-install">
+  <div class="scr-title"><div class="st">Install This App</div><div class="ss">Save to your home screen</div></div>
+  <div class="card">
+    <div class="sec-bar">📱 iPhone / Safari</div>
+    <div class="card-body">
+      <div class="inst-step"><div class="inst-num">1</div><div class="inst-txt">Open this page in <strong>Safari</strong> on your iPhone.</div></div>
+      <div class="inst-step"><div class="inst-num">2</div><div class="inst-txt">Tap the <strong>Share button</strong> (rectangle with an arrow pointing up) at the bottom of the screen.</div></div>
+      <div class="inst-step"><div class="inst-num">3</div><div class="inst-txt">Scroll down and tap <strong>"Add to Home Screen."</strong></div></div>
+      <div class="inst-step"><div class="inst-num">4</div><div class="inst-txt">Tap <strong>Add</strong>. PACE will appear on your home screen like a native app.</div></div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="sec-bar">🤖 Android / Chrome</div>
+    <div class="card-body">
+      <div class="inst-step"><div class="inst-num">1</div><div class="inst-txt">Open this page in <strong>Chrome</strong> on your Android device.</div></div>
+      <div class="inst-step"><div class="inst-num">2</div><div class="inst-txt">Tap the <strong>three-dot menu</strong> (⋮) in the top right corner.</div></div>
+      <div class="inst-step"><div class="inst-num">3</div><div class="inst-txt">Tap <strong>"Add to Home screen"</strong> or <strong>"Install App."</strong></div></div>
+      <div class="inst-step"><div class="inst-num">4</div><div class="inst-txt">Tap <strong>Add</strong> or <strong>Install</strong> to confirm.</div></div>
+    </div>
+  </div>
+</div>
+
+</div><!-- #screens -->
+
+<!-- BOTTOM NAV -->
+<nav class="bot-nav">
+  <button class="nav-btn active" id="nav-home" onclick="go('home');navActive('home')"><span class="nav-icon">🏠</span>Home</button>
+  <button class="nav-btn" id="nav-productivity" onclick="go('productivity');navActive('productivity')"><span class="nav-icon">🌲</span>Productv.</button>
+  <button class="nav-btn" id="nav-costs" onclick="go('costs');navActive('costs')"><span class="nav-icon">💰</span>Costs</button>
+  <button class="nav-btn" id="nav-report" onclick="go('report');navActive('report')"><span class="nav-icon">📊</span>Report</button>
+</nav>
+
+</div><!-- #app -->
+
+<script>
+// ═══ CONSTANTS ═══
+const CF_DEFAULTS = {
+  'Scribner Decimal C':   { hdwdMBF:6.5,  swdMBF:5.2  },
+  'International 1/4"':  { hdwdMBF:4.6,  swdMBF:2.75 },
+  'Doyle':                { hdwdMBF:6.3,  swdMBF:3.98 }
+};
+const PRODUCTS = [
+  { id:'hdwdSaw',  label:'Hdwd Sawlogs',         unit:'MBF',   cf:'hdwdMBF',  uLabel:'per MBF'  },
+  { id:'swdSaw',   label:'Swd Sawlogs',           unit:'MBF',   cf:'swdMBF',   uLabel:'per MBF'  },
+  { id:'hdwdPulp', label:'Hdwd Pulpwood & Bolts', unit:'tons',  cf:'ton',      uLabel:'per ton'  },
+  { id:'firewood', label:'Firewood Logs',         unit:'cords', cf:'hdwdCord', uLabel:'per cord' },
+  { id:'swdPulp',  label:'Swd Pulpwood & Bolts',  unit:'tons',  cf:'ton',      uLabel:'per ton'  },
+  { id:'woodChips',label:'Wood Chips',            unit:'tons',  cf:'ton',      uLabel:'per ton'  }
+];
+const OH_IDS = ['insurance','repairs','office','vehicle','supplies','travel','utilities','other'];
+let depMethod = 'calc';
+let _pac = {};
+
+// ═══ NAVIGATION ═══
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById('screen-' + id);
+  if (el) el.classList.add('active');
+  if (id === 'report') updateReport();
+}
+function navActive(id) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  const b = document.getElementById('nav-' + id);
+  if (b) b.classList.add('active');
+}
+function openMenu() { document.getElementById('menuOverlay').classList.add('open'); }
+function closeMenu() { document.getElementById('menuOverlay').classList.remove('open'); }
+function handleOverlayClick(e) { if (e.target.id === 'menuOverlay') closeMenu(); }
+
+// ═══ BUILD ROWS ═══
+function buildEqRows() {
+  let h = '';
+  for (let i = 1; i <= 15; i++) {
+    h += `<tr>
+      <td class="eq-num">${i}</td>
+      <td><input class="eq-name" type="text" id="eq_name_${i}" oninput="save()" placeholder="—"></td>
+      <td><input class="eq-hrs" type="number" id="eq_hrs_${i}" min="0" oninput="save();recalc()"></td>
+    </tr>`;
+  }
+  document.getElementById('eqTbody').innerHTML = h;
+}
+function buildProdRows() {
+  document.getElementById('prodRows').innerHTML = PRODUCTS.map(p =>
+    `<div class="prod-row">
+      <span class="prod-lbl">${p.label}</span>
+      <input class="prod-input" type="number" id="prod_${p.id}" min="0" oninput="save();recalc()" placeholder="0">
+      <span class="prod-unit">${p.unit}</span>
+    </div>`
+  ).join('');
+}
+
+// ═══ TOGGLE HELPERS ═══
+function toggleSysOther() {
+  const v = document.getElementById('systemType').value;
+  document.getElementById('sysOtherField').style.display = v === 'hybrid/other' ? 'block' : 'none';
+}
+function toggleRegOther() {
+  const v = document.getElementById('region').value;
+  document.getElementById('regOtherField').style.display = v === 'Other' ? 'block' : 'none';
+}
+function setDepMethod(m) {
+  depMethod = m;
+  document.getElementById('tog_dep').classList.toggle('active', m === 'calc');
+  document.getElementById('tog_loans').classList.toggle('active', m === 'loans');
+  document.getElementById('sec_dep').style.display   = m === 'calc'  ? 'block' : 'none';
+  document.getElementById('sec_loans').style.display = m === 'loans' ? 'block' : 'none';
+  save(); recalc();
+}
+function toggleColl(hdr) {
+  const body  = hdr.nextElementSibling;
+  const arrow = hdr.querySelector('.coll-arrow');
+  body.classList.toggle('open');
+  arrow.classList.toggle('open');
+}
+function applyLogRule() {
+  const rule = document.getElementById('logRule').value;
+  const cf = CF_DEFAULTS[rule] || CF_DEFAULTS['Scribner Decimal C'];
+  document.getElementById('cf_hdwdMBF').value = cf.hdwdMBF;
+  document.getElementById('cf_swdMBF').value  = cf.swdMBF;
+  recalc();
+}
+
+// ═══ RECALCULATE ═══
+function recalc() {
+  // Machine hours
+  let totalMH = 0;
+  for (let i = 1; i <= 15; i++) totalMH += parseFloat(document.getElementById('eq_hrs_'+i)?.value) || 0;
+  document.getElementById('disp_totalMH').textContent = fmt0(totalMH);
+
+  // Conversion factors
+  const cfH  = parseFloat(document.getElementById('cf_hdwdMBF')?.value)  || 0;
+  const cfS  = parseFloat(document.getElementById('cf_swdMBF')?.value)   || 0;
+  const cfHC = parseFloat(document.getElementById('cf_hdwdCord')?.value) || 0;
+
+  // Product tons
+  const pt = {
+    hdwdSaw:   (parseFloat(document.getElementById('prod_hdwdSaw')?.value)  ||0) * cfH,
+    swdSaw:    (parseFloat(document.getElementById('prod_swdSaw')?.value)   ||0) * cfS,
+    hdwdPulp:  (parseFloat(document.getElementById('prod_hdwdPulp')?.value) ||0),
+    firewood:  (parseFloat(document.getElementById('prod_firewood')?.value) ||0) * cfHC,
+    swdPulp:   (parseFloat(document.getElementById('prod_swdPulp')?.value)  ||0),
+    woodChips: (parseFloat(document.getElementById('prod_woodChips')?.value)||0)
+  };
+  const totalTons = Object.values(pt).reduce((a,b)=>a+b,0);
+  document.getElementById('disp_totalTons').textContent = fmt1(totalTons);
+
+  // Overhead
+  let overhead = 0;
+  OH_IDS.forEach(id => { overhead += parseFloat(document.getElementById('oh_'+id)?.value)||0; });
+  document.getElementById('disp_overhead').textContent  = fmtD(overhead);
+  document.getElementById('oh_carryover').textContent   = fmtD(overhead);
+
+  // Equipment values
+  const eqStart   = parseFloat(document.getElementById('eqStart')?.value)   ||0;
+  const eqEnd     = parseFloat(document.getElementById('eqEnd')?.value)     ||0;
+  const coreValue = parseFloat(document.getElementById('coreValue')?.value) ||0;
+  const calcDep   = Math.max(0, eqStart - eqEnd);
+  const oppCost   = (eqStart + coreValue) / 2 * 0.05;
+
+  document.getElementById('disp_calcDep').textContent = fmtD(calcDep);
+  document.getElementById('disp_oppCost').textContent = fmtD(oppCost);
+
+  const loans    = parseFloat(document.getElementById('loanPayments')?.value)||0;
+  const depLoans = depMethod === 'loans' ? loans : calcDep;
+  const payroll  = parseFloat(document.getElementById('payroll')?.value)    ||0;
+  const fuelGal  = parseFloat(document.getElementById('fuelGal')?.value)    ||0;
+  const fuelPri  = parseFloat(document.getElementById('fuelPrice')?.value)  ||0;
+  const fuelCost = fuelGal * fuelPri;
+
+  const totalCosts = overhead + payroll + fuelCost + depLoans + oppCost;
+  document.getElementById('disp_totalCosts').textContent = fmtD(totalCosts);
+
+  _pac = { totalMH, totalTons, totalCosts, pt, cfH, cfS, cfHC };
+}
+
+// ═══ REPORT ═══
+function updateReport() {
+  recalc();
+  const d = _pac;
+
+  const id       = document.getElementById('identifier')?.value   || '—';
+  const year     = document.getElementById('year')?.value         || '—';
+  const sys      = document.getElementById('systemType')?.value   || '—';
+  const sysOth   = document.getElementById('systemOther')?.value;
+  const size     = document.getElementById('businessSize')?.value || '—';
+  const reg      = document.getElementById('region')?.value       || '—';
+  const regOth   = document.getElementById('regionOther')?.value;
+
+  document.getElementById('r_id').textContent     = id;
+  document.getElementById('r_year').textContent   = year;
+  document.getElementById('r_system').textContent = sys === 'hybrid/other' && sysOth ? sysOth : sys;
+  document.getElementById('r_size').textContent   = size;
+  document.getElementById('r_region').textContent = reg === 'Other' && regOth ? regOth : reg;
+
+  const tc = d.totalCosts || 0;
+  const tt = d.totalTons  || 0;
+  const mh = d.totalMH    || 0;
+
+  document.getElementById('r_costs').textContent = fmtD(tc);
+  document.getElementById('r_mh').textContent    = fmt0(mh);
+  document.getElementById('r_tons').textContent  = fmt1(tt);
+  document.getElementById('r_cpt').textContent   = tt > 0 ? fmtD(tc / tt) : '—';
+  document.getElementById('r_tmh').textContent   = (tt > 0 && mh > 0) ? (tt / mh).toFixed(2) : '—';
+
+  const cpt = tt > 0 ? tc / tt : 0;
+  const rows = [
+    { label:'Hdwd Sawlogs',         tons: d.pt?.hdwdSaw   ||0, uc: cpt * (d.cfH  ||0), ul:'per MBF'  },
+    { label:'Swd Sawlogs',           tons: d.pt?.swdSaw    ||0, uc: cpt * (d.cfS  ||0), ul:'per MBF'  },
+    { label:'Hdwd Pulpwood & Bolts', tons: d.pt?.hdwdPulp  ||0, uc: cpt,                ul:'per ton'  },
+    { label:'Firewood Logs',         tons: d.pt?.firewood  ||0, uc: cpt * (d.cfHC ||0), ul:'per cord' },
+    { label:'Swd Pulpwood & Bolts',  tons: d.pt?.swdPulp   ||0, uc: cpt,                ul:'per ton'  },
+    { label:'Wood Chips',            tons: d.pt?.woodChips ||0, uc: cpt,                ul:'per ton'  }
+  ].filter(r => r.tons > 0);
+
+  if (!rows.length) {
+    document.getElementById('r_prodBody').innerHTML =
+      '<tr><td colspan="4" style="text-align:center;color:var(--pale);padding:16px;font-size:13px">No production data entered.</td></tr>';
+    return;
+  }
+  let html = rows.map(r => {
+    const pct = tt > 0 ? (r.tons / tt * 100).toFixed(1)+'%' : 'N/A';
+    const uc  = r.uc > 0 ? fmtD(r.uc) + ' ' + r.ul : 'N/A';
+    return `<tr><td>${r.label}</td><td style="text-align:center">${fmt1(r.tons)}</td><td style="text-align:center">${pct}</td><td>${uc}</td></tr>`;
+  }).join('');
+  html += `<tr class="rpt-total"><td>Total</td><td style="text-align:center">${fmt1(tt)}</td><td style="text-align:center">100%</td><td style="text-align:right">${fmtD(tc)}</td></tr>`;
+  document.getElementById('r_prodBody').innerHTML = html;
+}
+
+// ═══ SUBMIT ═══
+function doSubmit() {
+  const d    = _pac;
+  const recip = (document.getElementById('submitEmail')?.value || '').trim();
+  if (!recip) {
+    alert('Please enter a recipient email address before submitting.');
+    document.getElementById('submitEmail').focus();
+    return;
+  }
+  const id   = document.getElementById('identifier')?.value || '—';
+  const year = document.getElementById('year')?.value       || '—';
+  const sys  = document.getElementById('systemType')?.value || '—';
+  const size = document.getElementById('businessSize')?.value|| '—';
+  const reg  = document.getElementById('region')?.value     || '—';
+  const tt   = d.totalTons  || 0;
+  const tc   = d.totalCosts || 0;
+  const mh   = d.totalMH    || 0;
+
+  const body =
+`PACE Report — Productivity Analysis and Cost Evaluation
+
+Identifier: ${id}
+Year: ${year}
+System Type: ${sys}
+Business Size: ${size}
+Region: ${reg}
+
+PRODUCTIVITY
+Total Machine Hours: ${fmt0(mh)}
+Total Production (tons): ${fmt1(tt)}
+Tons per Machine Hour: ${mh&&tt ? (tt/mh).toFixed(2) : 'N/A'}
+
+COSTS
+Total Annual Costs: ${fmtD(tc)}
+Cost per Ton: ${tt>0 ? fmtD(tc/tt) : 'N/A'}
+
+Submitted via PACE v7 · Northeast Forests LLC`;
+
+  window.location.href =
+    `mailto:${recip}?subject=${encodeURIComponent('PACE Report — '+id+' — '+year)}&body=${encodeURIComponent(body)}`;
+}
+
+// ═══ FORMATTERS ═══
+function fmtD(n) {
+  if (!isFinite(n)||n===null) return '—';
+  return '$' + Math.round(n).toLocaleString();
+}
+function fmt0(n) {
+  if (!isFinite(n)) return '—';
+  return Math.round(n).toLocaleString();
+}
+function fmt1(n) {
+  if (!isFinite(n)) return '—';
+  return parseFloat(n.toFixed(1)).toLocaleString(undefined,{minimumFractionDigits:1,maximumFractionDigits:1});
+}
+
+// ═══ PERSISTENCE ═══
+function save() {
+  const data = {};
+  document.querySelectorAll('input[id], select[id]').forEach(el => { data[el.id] = el.value; });
+  data._dep = depMethod;
+  try { localStorage.setItem('pace_v7', JSON.stringify(data)); } catch(e){}
+}
+function load() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem('pace_v7')); } catch(e){}
+  if (!data) return;
+  Object.keys(data).forEach(k => {
+    if (k === '_dep') return;
+    const el = document.getElementById(k);
+    if (el) el.value = data[k];
+  });
+  toggleSysOther();
+  toggleRegOther();
+  // Apply log rule defaults first, then restore any custom CF values
+  applyLogRule();
+  ['cf_hdwdMBF','cf_swdMBF','cf_hdwdCord','cf_swdCord'].forEach(k => {
+    if (data[k]) { const el = document.getElementById(k); if (el) el.value = data[k]; }
+  });
+  if (data._dep) setDepMethod(data._dep);
+  recalc();
+}
+function resetAll() {
+  if (confirm('Reset all data? This cannot be undone.')) {
+    localStorage.removeItem('pace_v7');
+    location.reload();
+  }
+}
+
+// ═══ INIT ═══
+function init() {
+  buildEqRows();
+  buildProdRows();
+  applyLogRule();
+  document.getElementById('cf_hdwdCord').value = '2.75';
+  document.getElementById('cf_swdCord').value  = '2.20';
+  load();
+  recalc();
+}
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
